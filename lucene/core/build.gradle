@@ -23,3 +23,9 @@ dependencies {
   moduleTestImplementation project(':lucene:codecs')
   moduleTestImplementation project(':lucene:test-framework')
 }
+
+test {
+  testLogging {
+    showStandardStreams = true
+  }
+}

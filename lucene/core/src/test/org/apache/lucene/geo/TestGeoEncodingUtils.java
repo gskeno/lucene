@@ -31,6 +31,7 @@ import java.util.Random;
 import org.apache.lucene.tests.util.LuceneTestCase;
 import org.apache.lucene.tests.util.TestUtil;
 import org.apache.lucene.util.NumericUtils;
+import org.junit.Assert;
 
 /** Tests methods in {@link GeoEncodingUtils} */
 public class TestGeoEncodingUtils extends LuceneTestCase {
@@ -135,16 +136,44 @@ public class TestGeoEncodingUtils extends LuceneTestCase {
     }
   }
 
-  // check edge/interesting cases explicitly
+  // check edge/interesting cases explicitly 明确检查边缘case
   public void testEncodeEdgeCases() {
+    // -90度纬度，应该被编码为Int最小值
     assertEquals(Integer.MIN_VALUE, encodeLatitude(MIN_LAT_INCL));
     assertEquals(Integer.MIN_VALUE, encodeLatitudeCeil(MIN_LAT_INCL));
+    // 90度纬度，应该被编码为Int最大值
     assertEquals(Integer.MAX_VALUE, encodeLatitude(MAX_LAT_INCL));
     assertEquals(Integer.MAX_VALUE, encodeLatitudeCeil(MAX_LAT_INCL));
 
+    // -180度经度，应该被编码为Int最小值
     assertEquals(Integer.MIN_VALUE, encodeLongitude(MIN_LON_INCL));
     assertEquals(Integer.MIN_VALUE, encodeLongitudeCeil(MIN_LON_INCL));
+    // 180度经度，应该被编码为Int最大值
     assertEquals(Integer.MAX_VALUE, encodeLongitude(MAX_LON_INCL));
     assertEquals(Integer.MAX_VALUE, encodeLongitudeCeil(MAX_LON_INCL));
+  }
+
+  public void testMyGEO(){
+    double latitude = 90;
+    int latEnc = (int) Math.floor(latitude / (180.0D/(0x1L<<32)));
+    System.out.println(latEnc == Integer.MAX_VALUE);
+
+    latitude = -90;
+    latEnc = (int) Math.floor(latitude / (180.0D/(0x1L<<32)));
+    System.out.println(latEnc == Integer.MIN_VALUE);
+
+    // -?,  ?的值为当前二进制取反+1
+    System.out.println(Integer.toBinaryString(-4));
+
+    System.out.println((int) Math.floor(32D / (180.0D/(0x1L<<32))));
+
+
+    Assert.assertTrue(Math.ceil(0.7) == 1d);
+    Assert.assertTrue(Math.ceil(0.5) == 1d);
+    Assert.assertTrue(Math.ceil(0.4) == 1d);
+    Assert.assertTrue(Math.ceil(0) == 0d);
+    Assert.assertTrue(Math.ceil(-0.5) == 0d);
+    Assert.assertTrue(Math.ceil(-1.5) == -1d);
+
   }
 }
