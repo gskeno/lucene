@@ -21,7 +21,6 @@ import java.io.PrintStream;
 import java.nio.charset.Charset;
 import java.nio.file.Path;
 import org.apache.lucene.tests.util.LuceneTestCase;
-import org.junit.BeforeClass;
 
 public class TestDemo extends LuceneTestCase {
 
@@ -53,6 +52,7 @@ public class TestDemo extends LuceneTestCase {
     testOneSearch(indexDir, "patent", 8);
     testOneSearch(indexDir, "lucene", 0);
     testOneSearch(indexDir, "gnu", 6);
+    // grep -i derivative  * | awk -v FS=":"  '{print $1}'|sort -u|wc -l
     testOneSearch(indexDir, "derivative", 8);
     testOneSearch(indexDir, "license", 13);
   }
