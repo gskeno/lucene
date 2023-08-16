@@ -21,6 +21,7 @@ import java.io.PrintStream;
 import java.nio.charset.Charset;
 import java.nio.file.Path;
 import org.apache.lucene.tests.util.LuceneTestCase;
+import org.junit.BeforeClass;
 
 public class TestDemo extends LuceneTestCase {
 
@@ -43,6 +44,7 @@ public class TestDemo extends LuceneTestCase {
   }
 
   public void testIndexSearch() throws Exception {
+    LEAVE_TEMPORARY.set(true);
     Path dir = getDataPath("test-files/docs");
     Path indexDir = createTempDir("ContribDemoTest");
     IndexFiles.main(

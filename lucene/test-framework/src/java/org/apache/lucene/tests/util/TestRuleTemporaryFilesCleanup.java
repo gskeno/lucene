@@ -83,7 +83,7 @@ final class TestRuleTemporaryFilesCleanup extends TestRuleAdapter {
   void registerToRemoveAfterSuite(Path f) {
     assert f != null;
 
-    if (LuceneTestCase.LEAVE_TEMPORARY) {
+    if (LuceneTestCase.LEAVE_TEMPORARY.get()) {
       System.err.println("INFO: Will leave temporary file: " + f.toAbsolutePath());
       return;
     }

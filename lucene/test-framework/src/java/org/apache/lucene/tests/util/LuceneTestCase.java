@@ -96,6 +96,7 @@ import java.util.TreeSet;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -504,7 +505,7 @@ public abstract class LuceneTestCase extends Assert {
       systemPropertyAsInt("tests.multiplier", TEST_NIGHTLY ? 2 : 1);
 
   /** Leave temporary files on disk, even on successful runs. */
-  public static final boolean LEAVE_TEMPORARY;
+  public static final AtomicBoolean LEAVE_TEMPORARY;
 
   static {
     boolean defaultValue = false;
@@ -516,7 +517,7 @@ public abstract class LuceneTestCase extends Assert {
             "solr.test.leavetmpdir" /* Solr's legacy */)) {
       defaultValue |= systemPropertyAsBoolean(property, false);
     }
-    LEAVE_TEMPORARY = defaultValue;
+    LEAVE_TEMPORARY = new AtomicBoolean(defaultValue);
   }
 
   /**
