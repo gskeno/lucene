@@ -40,6 +40,7 @@ public class WordlistLoader {
   private WordlistLoader() {}
 
   /**
+   * 一行对应一个元素，行首行尾去除空格，空行忽略
    * Reads lines from a Reader and adds every non-blank line as an entry to a CharArraySet (omitting
    * leading and trailing whitespace). Every line of the Reader should contain only one word. The
    * words need to be in lowercase if you make use of an Analyzer which uses LowerCaseFilter (like
@@ -110,7 +111,7 @@ public class WordlistLoader {
    * uses LowerCaseFilter (like StandardAnalyzer).
    *
    * @param reader Reader containing the wordlist
-   * @param comment The string representing a comment.
+   * @param comment The string representing a comment. 以comment开头的字符串会被过滤掉
    * @param result the {@link CharArraySet} to fill with the readers words
    * @return the given {@link CharArraySet} with the reader's words
    */
@@ -132,7 +133,7 @@ public class WordlistLoader {
 
   /**
    * Reads lines from a Reader and adds every non-comment line as an entry to a CharArraySet
-   * (omitting leading and trailing whitespace). Every line of the Reader should contain only one
+   * (omitting leading and trailing whitespace 省去前导和尾部的空格). Every line of the Reader should contain only one
    * word. The words need to be in lowercase if you make use of an Analyzer which uses
    * LowerCaseFilter (like StandardAnalyzer).
    *
@@ -181,9 +182,9 @@ public class WordlistLoader {
    * <p>The snowball format is the following:
    *
    * <ul>
-   *   <li>Lines may contain multiple words separated by whitespace.
-   *   <li>The comment character is the vertical line (&#124;).
-   *   <li>Lines may contain trailing comments.
+   *   <li>Lines may contain multiple words separated by whitespace. 一行可能有多个单词
+   *   <li>The comment character is the vertical line (&#124;). 注释富豪是竖线|
+   *   <li>Lines may contain trailing comments. 行尾可能有注释
    * </ul>
    *
    * @param reader Reader containing a Snowball stopword list
@@ -197,7 +198,7 @@ public class WordlistLoader {
       while ((line = br.readLine()) != null) {
         int comment = line.indexOf('|');
         if (comment >= 0) line = line.substring(0, comment);
-        String[] words = line.split("\\s+");
+        String[] words = line.split("\\s+"); // 匹配任何空白符
         for (int i = 0; i < words.length; i++) {
           if (words[i].length() > 0) result.add(words[i]);
         }

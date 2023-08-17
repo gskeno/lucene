@@ -25,6 +25,7 @@ public class TestWordlistLoader extends LuceneTestCase {
 
   public void testWordlistLoading() throws IOException {
     String s = "ONE\n  two \nthree\n\n";
+    // 一行一个元素，行首行尾去除空格，空行忽略
     CharArraySet wordSet1 = WordlistLoader.getWordSet(new StringReader(s));
     checkSet(wordSet1);
     CharArraySet wordSet2 = WordlistLoader.getWordSet(new BufferedReader(new StringReader(s)));
@@ -33,6 +34,7 @@ public class TestWordlistLoader extends LuceneTestCase {
 
   public void testComments() throws Exception {
     String s = "ONE\n  two \nthree\n#comment";
+    // 以#开头的字符串会被过滤掉
     CharArraySet wordSet1 = WordlistLoader.getWordSet(new StringReader(s), "#");
     checkSet(wordSet1);
     assertFalse(wordSet1.contains("#comment"));
@@ -49,6 +51,7 @@ public class TestWordlistLoader extends LuceneTestCase {
 
   /** Test stopwords in snowball format */
   public void testSnowballListLoading() throws IOException {
+    // 竖线|是注释起始符，注释会被忽略掉
     String s =
         "|comment\n"
             + // commented line
