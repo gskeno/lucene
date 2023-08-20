@@ -29,14 +29,14 @@ import org.apache.lucene.util.AttributeImpl;
 import org.apache.lucene.util.AttributeSource;
 
 /**
- * A <code>TokenStream</code> enumerates the sequence of tokens, either from {@link Field}s of a
+ * A <code>TokenStream</code> enumerates 列举 the sequence of tokens, either from {@link Field}s of a
  * {@link Document} or from query text.
  *
  * <p>This is an abstract class; concrete subclasses are:
  *
  * <ul>
- *   <li>{@link Tokenizer}, a <code>TokenStream</code> whose input is a Reader; and
- *   <li>{@link TokenFilter}, a <code>TokenStream</code> whose input is another <code>TokenStream
+ *   <li>{@link Tokenizer}, a <code>TokenStream</code> whose input is a Reader; and  Tokenizer的输入是Reader
+ *   <li>{@link TokenFilter}, a <code>TokenStream</code> whose input is another <code>TokenStream  TokenFilter的输入是TokenStream
  *       </code>.
  * </ul>
  *

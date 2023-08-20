@@ -33,7 +33,7 @@ public abstract class Tokenizer extends TokenStream {
   /** The text source for this Tokenizer. */
   protected Reader input = ILLEGAL_STATE_READER;
 
-  /** Pending reader: not actually assigned to input until reset() */
+  /** Pending reader: not actually assigned to input until reset() */ // 调用reset方法时，才会将其赋值给input进而使用
   private Reader inputPending = ILLEGAL_STATE_READER;
 
   /**

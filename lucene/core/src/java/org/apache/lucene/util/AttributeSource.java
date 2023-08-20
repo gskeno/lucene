@@ -28,6 +28,8 @@ import java.util.Set;
 import org.apache.lucene.analysis.TokenStream; // for javadocs
 
 /**
+ * 维护一堆AttributeImpl子类实例，每个Attribute最多只能有一个实例。
+ *
  * An AttributeSource contains a list of different {@link AttributeImpl}s, and methods to add and
  * get them. There can only be a single instance of an attribute in the same AttributeSource
  * instance. This is ensured by passing in the actual type of the Attribute (Class&lt;Attribute&gt;)
@@ -61,8 +63,8 @@ public class AttributeSource {
 
   // These two maps must always be in sync!!!
   // So they are private, final and read-only from the outside (read-only iterators)
-  private final Map<Class<? extends Attribute>, AttributeImpl> attributes;
-  private final Map<Class<? extends AttributeImpl>, AttributeImpl> attributeImpls;
+  private final Map<Class<? extends Attribute>, AttributeImpl> attributes; // key是接口
+  private final Map<Class<? extends AttributeImpl>, AttributeImpl> attributeImpls; // key是具体子类
   private final State[] currentState;
 
   private final AttributeFactory factory;
@@ -75,7 +77,7 @@ public class AttributeSource {
     this(AttributeFactory.DEFAULT_ATTRIBUTE_FACTORY);
   }
 
-  /** An AttributeSource that uses the same attributes as the supplied one. */
+  /** An AttributeSource that uses the same attributes as the supplied one. 包装者*/
   public AttributeSource(AttributeSource input) {
     Objects.requireNonNull(input, "input AttributeSource must not be null");
     this.attributes = input.attributes;
@@ -193,7 +195,7 @@ public class AttributeSource {
     for (final Class<? extends Attribute> curInterface : getAttributeInterfaces(clazz)) {
       // Attribute is a superclass of this interface
       if (!attributes.containsKey(curInterface)) {
-        // invalidate state to force recomputation in captureState()
+        // invalidate state to force recomputation in captureState() 清空state以强制重新计算
         this.currentState[0] = null;
         attributes.put(curInterface, att);
         attributeImpls.put(clazz, att);
@@ -202,6 +204,8 @@ public class AttributeSource {
   }
 
   /**
+   * 入参必须是 Attribute 的子接口
+   *
    * The caller must pass in a Class&lt;? extends Attribute&gt; value. This method first checks if
    * an instance of that class is already in this AttributeSource and returns it. Otherwise a new
    * instance is created, added to this AttributeSource and returned.
@@ -292,6 +296,7 @@ public class AttributeSource {
   }
 
   /**
+   * 快照捕捉Attribute，涉及到深拷贝
    * Captures the state of all Attributes. The return value can be passed to {@link #restoreState}
    * to restore the state of this or another AttributeSource.
    *
@@ -303,6 +308,7 @@ public class AttributeSource {
   }
 
   /**
+   * 重置
    * Restores this state by copying the values of all attribute implementations that this state
    * contains into the attributes implementations of the targetStream. The targetStream must contain
    * a corresponding instance for each argument contained in this state (e.g. it is not possible to

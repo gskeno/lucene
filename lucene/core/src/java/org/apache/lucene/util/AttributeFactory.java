@@ -59,7 +59,7 @@ public abstract class AttributeFactory {
     private final ClassValue<MethodHandle> constructors =
         new ClassValue<MethodHandle>() {
           @Override
-          protected MethodHandle computeValue(Class<?> attClass) {
+          protected MethodHandle computeValue(Class<?> attClass) { // 构造函数的方法句柄，返回的实现类是 当前类 + Impl
             return findAttributeImplCtor(findImplClass(attClass.asSubclass(Attribute.class)));
           }
         };

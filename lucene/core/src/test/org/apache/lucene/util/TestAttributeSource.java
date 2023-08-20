@@ -40,25 +40,25 @@ public class TestAttributeSource extends LuceneTestCase {
   public void testCaptureState() {
     // init a first instance
     AttributeSource src = new AttributeSource();
-    CharTermAttribute termAtt = src.addAttribute(CharTermAttribute.class);
-    TypeAttribute typeAtt = src.addAttribute(TypeAttribute.class);
-    termAtt.append("TestTerm");
+    CharTermAttribute termAtt = src.addAttribute(CharTermAttribute.class); // 新增类 CharTermAttributeImpl
+    TypeAttribute typeAtt = src.addAttribute(TypeAttribute.class); // 新增类TypeAttributeImpl
+    termAtt.append("TestTerm"); // 底层是char数组，连续append，term会连在一起
     typeAtt.setType("TestType");
-    final int hashCode = src.hashCode();
+    final int hashCode = src.hashCode(); // 底层会遍历每个Attribute
 
     AttributeSource.State state = src.captureState();
 
     // modify the attributes
-    termAtt.setEmpty().append("AnotherTestTerm");
-    typeAtt.setType("AnotherTestType");
+    termAtt.setEmpty().append("AnotherTestTerm"); // 重置下标，重新设置term
+    typeAtt.setType("AnotherTestType"); // 重设type
     assertTrue("Hash code should be different", hashCode != src.hashCode());
 
-    src.restoreState(state);
+    src.restoreState(state); // 重置
     assertEquals("TestTerm", termAtt.toString());
     assertEquals("TestType", typeAtt.type());
     assertEquals("Hash code should be equal after restore", hashCode, src.hashCode());
 
-    // restore into an exact configured copy
+    // restore into an exact configured copy 装载到另外一个AttributeSource中也ok
     AttributeSource copy = new AttributeSource();
     copy.addAttribute(CharTermAttribute.class);
     copy.addAttribute(TypeAttribute.class);
@@ -70,6 +70,7 @@ public class TestAttributeSource extends LuceneTestCase {
     assertEquals("Both AttributeSources should be equal after restore", src, copy);
 
     // init a second instance (with attributes in different order and one additional attribute)
+    // 装载到另外一个AttributeSource中，state中只有两个Attribute，所以只装载两个类内部信息
     AttributeSource src2 = new AttributeSource();
     typeAtt = src2.addAttribute(TypeAttribute.class);
     FlagsAttribute flagsAtt = src2.addAttribute(FlagsAttribute.class);
@@ -86,6 +87,7 @@ public class TestAttributeSource extends LuceneTestCase {
     termAtt = src3.addAttribute(CharTermAttribute.class);
     // The third instance is missing the TypeAttribute, so restoreState() should throw
     // IllegalArgumentException
+    // 要装载的AttributeSource比state中的Attribute少了，异常
     expectThrows(
         IllegalArgumentException.class,
         () -> {
@@ -100,12 +102,14 @@ public class TestAttributeSource extends LuceneTestCase {
     flagsAtt.setFlags(1234);
     typeAtt.setType("TestType");
 
+    // 迭代器顺序保持不变
     final AttributeSource clone = src.cloneAttributes();
     final Iterator<Class<? extends Attribute>> it = clone.getAttributeClassesIterator();
     assertEquals("FlagsAttribute must be the first attribute", FlagsAttribute.class, it.next());
     assertEquals("TypeAttribute must be the second attribute", TypeAttribute.class, it.next());
     assertFalse("No more attributes", it.hasNext());
 
+    // clone而来的与原来的不是一个实例，但是equals是相等的
     final FlagsAttribute flagsAtt2 = clone.getAttribute(FlagsAttribute.class);
     assertNotNull(flagsAtt2);
     final TypeAttribute typeAtt2 = clone.getAttribute(TypeAttribute.class);
@@ -134,6 +138,7 @@ public class TestAttributeSource extends LuceneTestCase {
     assertEquals("TypeAttribute of original and clone must be equal", typeAtt2, typeAtt);
   }
 
+  // 实现类都是 接口 + Impl
   public void testDefaultAttributeFactory() throws Exception {
     AttributeSource src = new AttributeSource();
 
@@ -164,7 +169,7 @@ public class TestAttributeSource extends LuceneTestCase {
         IllegalArgumentException.class,
         () -> {
           AttributeSource src = new AttributeSource();
-          src.addAttribute(Token.class);
+          src.addAttribute(Token.class); // 参数必须是 Attribute的子接口
           fail("Should throw IllegalArgumentException");
         });
 
@@ -180,24 +185,24 @@ public class TestAttributeSource extends LuceneTestCase {
         () -> {
           AttributeSource src = new AttributeSource();
           // break this by unsafe cast
-          src.addAttribute((Class) Iterator.class);
+          src.addAttribute((Class) Iterator.class); // Iterator不是Attribute子接口
         });
   }
 
   public void testLUCENE_3042() throws Exception {
     final AttributeSource src1 = new AttributeSource();
     src1.addAttribute(CharTermAttribute.class).append("foo");
-    int hash1 = src1.hashCode(); // this triggers a cached state
-    final AttributeSource src2 = new AttributeSource(src1);
+    int hash1 = src1.hashCode(); // this triggers a cached state, 是一个快照
+    final AttributeSource src2 = new AttributeSource(src1); // src1的属性全被赋值到src2，所以对src2的变动会影响到src1
     src2.addAttribute(TypeAttribute.class).setType("bar");
     assertTrue(
-        "The hashCode is identical, so the captured state was preserved.",
+        "The hashCode is identical(一样的), so the captured state was preserved(保存).",
         hash1 != src1.hashCode());
     assertEquals(src2.hashCode(), src1.hashCode());
   }
 
   public void testClonePayloadAttribute() throws Exception {
-    // LUCENE-6055: verify that PayloadAttribute.clone() does deep cloning.
+    // LUCENE-6055: verify that PayloadAttribute.clone() does deep cloning. 深度拷贝，普通值和对象都进行拷贝
     PayloadAttributeImpl src = new PayloadAttributeImpl(new BytesRef(new byte[] {1, 2, 3}));
 
     // test clone()
@@ -223,7 +228,7 @@ public class TestAttributeSource extends LuceneTestCase {
 
     // Add attributes with the default factory, then try to remove all of them
     AttributeSource defaultFactoryAttributeSource = new AttributeSource();
-
+    // 起初为空
     assertFalse(defaultFactoryAttributeSource.hasAttributes());
 
     for (Class<? extends Attribute> attrClass : attrClasses) {
@@ -243,6 +248,7 @@ public class TestAttributeSource extends LuceneTestCase {
     assertFalse(defaultFactoryAttributeSource.hasAttributes());
 
     // Add attributes with the packed implementations factory, then try to remove all of them
+    // Attribute能转化为PackedTokenAttributeImpl子类，则转换；否则，使用默认工厂转换
     AttributeSource packedImplsAttributeSource =
         new AttributeSource(TokenStream.DEFAULT_TOKEN_ATTRIBUTE_FACTORY);
     assertFalse(packedImplsAttributeSource.hasAttributes());

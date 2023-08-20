@@ -70,6 +70,6 @@ public final class WhitespaceTokenizer extends CharTokenizer {
   /** Collects only characters which do not satisfy {@link Character#isWhitespace(int)}. */
   @Override
   protected boolean isTokenChar(int c) {
-    return !Character.isWhitespace(c);
+    return !Character.isWhitespace(c); // 不是空格就返回true
   }
 }

@@ -28,7 +28,7 @@ import org.apache.lucene.util.automaton.Automaton;
 // TODO: maybe also toFST?  then we can translate atts into FST outputs/weights
 
 /**
- * Consumes a TokenStream and creates an {@link Automaton} where the transition labels are UTF8
+ * Consumes a TokenStream and creates an {@link Automaton} where the transition 转变 labels are UTF8
  * bytes (or Unicode code points if unicodeArcs is true) from the {@link TermToBytesRefAttribute}.
  * Between tokens we insert POS_SEP and for holes we insert HOLE.
  *

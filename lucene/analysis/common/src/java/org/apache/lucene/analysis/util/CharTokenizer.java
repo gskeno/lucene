@@ -170,44 +170,44 @@ public abstract class CharTokenizer extends Tokenizer {
 
   @Override
   public final boolean incrementToken() throws IOException {
-    clearAttributes();
+    clearAttributes(); // termAtt的属性全部清理掉，比如在遍历 I am good man时，到第二个单词am时，要把第一个单词I的信息清除掉
     int length = 0;
     int start = -1; // this variable is always initialized
     int end = -1;
     char[] buffer = termAtt.buffer();
     while (true) {
-      if (bufferIndex >= dataLen) {
+      if (bufferIndex >= dataLen) { // 句子开始和结束时，进入此分支
         offset += dataLen;
-        CharacterUtils.fill(ioBuffer, input); // read supplementary char aware with CharacterUtils
+        CharacterUtils.fill(ioBuffer, input); // read supplementary char aware with CharacterUtils 往ioBuffer中写数据
         if (ioBuffer.getLength() == 0) {
           dataLen = 0; // so next offset += dataLen won't decrement offset
           if (length > 0) {
             break;
           } else {
             finalOffset = correctOffset(offset);
-            return false;
+            return false; // 句子结束后，再调用该方法时，返回false
           }
         }
         dataLen = ioBuffer.getLength();
         bufferIndex = 0;
       }
       // use CharacterUtils here to support < 3.1 UTF-16 code unit behavior if the char based
-      // methods are gone
-      final int c = Character.codePointAt(ioBuffer.getBuffer(), bufferIndex, ioBuffer.getLength());
+      // methods are gone 获取代码点，一个代码点对应1或2个char，比如笑脸表情就对应两个char， https://www.cnblogs.com/sariseBlog/p/14946408.html
+      final int c = Character.codePointAt(ioBuffer.getBuffer(), bufferIndex, ioBuffer.getLength()); // 第三个参数只是起到校验作业，无实际应用
       final int charCount = Character.charCount(c);
-      bufferIndex += charCount;
+      bufferIndex += charCount;  // 下次获取代码点时需要跳过1或2个char
 
       if (isTokenChar(c)) { // if it's a token char
         if (length == 0) { // start of token
           assert start == -1;
           start = offset + bufferIndex - charCount;
           end = start;
-        } else if (length >= buffer.length - 1) { // supplementary could run out of bounds?
+        } else if (length >= buffer.length - 1) { // supplementary 补充的，附加的 could run out of bounds?
           // make sure a supplementary fits in the buffer
           buffer = termAtt.resizeBuffer(2 + length);
         }
         end += charCount;
-        length += Character.toChars(c, buffer, length); // buffer it, normalized
+        length += Character.toChars(c, buffer, length); // buffer it, normalized 标准化的 往buffer的length位置下标处加字母
         // buffer overflow! make sure to check for >= surrogate pair could break == test
         if (length >= maxTokenLen) {
           break;
@@ -217,7 +217,7 @@ public abstract class CharTokenizer extends Tokenizer {
       }
     }
 
-    termAtt.setLength(length);
+    termAtt.setLength(length); // length是句子中某个单词的长度，start是单词在句子中的起始位置(含)，end是单词在句子中的结束位置(不含)
     assert start != -1;
     offsetAtt.setOffset(correctOffset(start), finalOffset = correctOffset(end));
     return true;
