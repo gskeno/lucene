@@ -61,6 +61,12 @@ public class TestGraphTokenizers extends BaseTokenStreamTestCase {
   // NOTE: all input tokens must be length 1!!!  This means
   // you cannot turn on MockCharFilter when random
   // testing...
+  // 从字符串生成一个图TokenStream;使用单个空格分隔位置，在同一位置使用多个标记，
+  // 并使用:添加可选的位置长度。例如“a b c”是一个简单的链，“ax b c”在位置0上加上“x”，posLen=1，
+  // “ax: 3bc”在位置a上加上“x”，posLen=3。
+  // 令牌是正常形式的!因此，偏移量是基于给定位置的第一个标记来计算的。
+  // 注意:每个标记必须是一个字符!我们在计算偏移量时假设是这样的…注意:所有输入的令牌长度必须为1!!
+  // 这意味着你不能在随机测试时打开MockCharFilter…
 
   public static final class GraphTokenizer extends Tokenizer {
     private List<Token> tokens;

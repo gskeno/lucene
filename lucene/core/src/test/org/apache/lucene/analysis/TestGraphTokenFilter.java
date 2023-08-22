@@ -50,61 +50,72 @@ public class TestGraphTokenFilter extends BaseTokenStreamTestCase {
     tok.setReader(new StringReader("a b/c d e/f:3 g/h i j k"));
     tok.reset();
 
-    assertFalse(graph.incrementGraph());
+    assertFalse(graph.incrementGraph()); // 根节点还未设置，无法获得下一个路由
     assertEquals(0, graph.cachedTokenCount());
 
-    assertTrue(graph.incrementBaseToken());
+    assertTrue(graph.incrementBaseToken()); // 路由根节点向前移动一步，走到a
     assertEquals("a", termAtt.toString());
-    assertEquals(1, posIncAtt.getPositionIncrement());
-    assertTrue(graph.incrementGraphToken());
+    assertEquals(1, posIncAtt.getPositionIncrement()); //字母a占1个位置增量
+    assertTrue(graph.incrementGraphToken()); // 当前路由上移动到下一个token处，即b位置处
     assertEquals("b", termAtt.toString());
+    assertEquals(1, posIncAtt.getPositionIncrement()); // 字母b占1个位置增量
+    // 内部会遍历c和d，因为c与b占用的位置一样，c的positionIncrement为0，所以这里会最终走到d。
+    // b和c的position是一致的，posLen也是一样的，都是1，但是b拥有位置增量，c没有，因为c与b在同一位置处，
+    // 若c也位置增量，则b到d，跨度是2，不符合预期
     assertTrue(graph.incrementGraphToken());
+
     assertEquals("d", termAtt.toString());
-    assertTrue(graph.incrementGraph());
+    assertEquals(4, graph.cachedTokenCount()); // 已经遍历了a,b,c,d
+
+    assertTrue(graph.incrementGraph());  // 新增一个图表(走下一个路由), abd路由已经走过，这次走a,c,d路由；另外，内部会遍历到字符e
+    assertEquals(5, graph.cachedTokenCount());
     assertEquals("a", termAtt.toString());
-    assertTrue(graph.incrementGraphToken());
+    assertTrue(graph.incrementGraphToken()); // graphPos++
     assertEquals("c", termAtt.toString());
     assertTrue(graph.incrementGraphToken());
     assertEquals("d", termAtt.toString());
-    assertFalse(graph.incrementGraph());
+
+    assertFalse(graph.incrementGraph()); // a->d的两条路由已经遍历，没有新的路由了
     assertEquals(5, graph.cachedTokenCount());
 
-    assertTrue(graph.incrementBaseToken());
+    // tok.setReader(new StringReader("a b/c d e/f:3 g/h i j k"));
+    assertTrue(graph.incrementBaseToken()); // 路由根节点向前移动一步，走到b
     assertEquals("b", termAtt.toString());
     assertTrue(graph.incrementGraphToken());
     assertEquals("d", termAtt.toString());
     assertTrue(graph.incrementGraphToken());
     assertEquals("e", termAtt.toString());
-    assertTrue(graph.incrementGraph());
+    assertTrue(graph.incrementGraph()); // 寻找b--->e的下一个路由，即b,d,f，因为e,f所处位置一致
     assertEquals("b", termAtt.toString());
     assertTrue(graph.incrementGraphToken());
     assertEquals("d", termAtt.toString());
     assertTrue(graph.incrementGraphToken());
     assertEquals("f", termAtt.toString());
-    assertFalse(graph.incrementGraph());
+    assertFalse(graph.incrementGraph()); // b--->f，不再有其他路由了
     assertEquals(6, graph.cachedTokenCount());
 
-    assertTrue(graph.incrementBaseToken());
+    assertTrue(graph.incrementBaseToken()); // 路由根节点向前移动一步，走到c
     assertEquals("c", termAtt.toString());
-    assertEquals(0, posIncAtt.getPositionIncrement());
+    assertEquals(0, posIncAtt.getPositionIncrement()); // c与b占用同一个位置，b在前，c在后，c不拥有位置增量
     assertTrue(graph.incrementGraphToken());
     assertEquals("d", termAtt.toString());
-    assertFalse(graph.incrementGraph());
+    assertFalse(graph.incrementGraph()); // c--->d只有一条路由
     assertEquals(6, graph.cachedTokenCount());
 
-    assertTrue(graph.incrementBaseToken());
+    // tok.setReader(new StringReader("a b/c d e/f:3 g/h i j k"));
+    assertTrue(graph.incrementBaseToken()); // 路由根节点向前移动一步，走到d
     assertEquals("d", termAtt.toString());
     assertTrue(graph.incrementGraphToken());
     assertEquals("e", termAtt.toString());
     assertTrue(graph.incrementGraphToken());
     assertEquals("g", termAtt.toString());
-    assertTrue(graph.incrementGraph());
+    assertTrue(graph.incrementGraph()); // 寻找d--->g的另一条路由，即d,e,h
     assertEquals("d", termAtt.toString());
     assertTrue(graph.incrementGraphToken());
     assertEquals("e", termAtt.toString());
     assertTrue(graph.incrementGraphToken());
     assertEquals("h", termAtt.toString());
-    assertTrue(graph.incrementGraph());
+    assertTrue(graph.incrementGraph()); // 寻找下一条路由，包含起点在内的3个字符，即d,f,j
     assertEquals("d", termAtt.toString());
     assertTrue(graph.incrementGraphToken());
     assertEquals("f", termAtt.toString());
@@ -115,7 +126,7 @@ public class TestGraphTokenFilter extends BaseTokenStreamTestCase {
 
     // tok.setReader(new StringReader("a b/c d e/f:3 g/h i j k"));
 
-    assertTrue(graph.incrementBaseToken());
+    assertTrue(graph.incrementBaseToken()); // 路由根节点向前移动一步，走到e
     assertEquals("e", termAtt.toString());
     assertTrue(graph.incrementGraphToken());
     assertEquals("g", termAtt.toString());
@@ -123,43 +134,45 @@ public class TestGraphTokenFilter extends BaseTokenStreamTestCase {
     assertEquals("i", termAtt.toString());
     assertTrue(graph.incrementGraphToken());
     assertEquals("j", termAtt.toString());
-    assertTrue(graph.incrementGraph());
+    assertTrue(graph.incrementGraph()); // 寻找下一个路由
     assertEquals("e", termAtt.toString());
     assertTrue(graph.incrementGraphToken());
     assertEquals("h", termAtt.toString());
-    assertFalse(graph.incrementGraph());
+    assertFalse(graph.incrementGraph()); // e,h 已走过，没有e开始的其他路径了
     assertEquals(8, graph.cachedTokenCount());
 
-    assertTrue(graph.incrementBaseToken());
+    assertTrue(graph.incrementBaseToken()); // 路由根节点向前移动一步，走到f
     assertEquals("f", termAtt.toString());
     assertTrue(graph.incrementGraphToken());
     assertEquals("j", termAtt.toString());
     assertTrue(graph.incrementGraphToken());
     assertEquals("k", termAtt.toString());
-    assertFalse(graph.incrementGraphToken());
-    assertFalse(graph.incrementGraph());
+    assertFalse(graph.incrementGraphToken()); // k后没有其他字符了
+    assertFalse(graph.incrementGraph()); // f到k也没有下一个路由了
     assertEquals(8, graph.cachedTokenCount());
 
-    assertTrue(graph.incrementBaseToken());
+    assertTrue(graph.incrementBaseToken()); // 路由根节点向前移动一步，走到g
     assertEquals("g", termAtt.toString());
     assertTrue(graph.incrementGraphToken());
     assertEquals("i", termAtt.toString());
-    assertFalse(graph.incrementGraph());
+    assertFalse(graph.incrementGraph()); // g到i，也没有下一个路由了
     assertEquals(8, graph.cachedTokenCount());
 
-    assertTrue(graph.incrementBaseToken());
+    assertTrue(graph.incrementBaseToken());  // 路由根节点向前移动一步，走到h
     assertEquals("h", termAtt.toString());
-    assertFalse(graph.incrementGraph());
+    assertFalse(graph.incrementGraph()); // h到h，也没有下一个路由了
     assertEquals(8, graph.cachedTokenCount());
 
-    assertTrue(graph.incrementBaseToken());
-    assertTrue(graph.incrementBaseToken());
-    assertTrue(graph.incrementBaseToken());
+    // tok.setReader(new StringReader("a b/c d e/f:3 g/h i j k"));
+
+    assertTrue(graph.incrementBaseToken()); // 路由根节点向前移动一步，走到i
+    assertTrue(graph.incrementBaseToken()); // 路由根节点向前移动一步，走到j
+    assertTrue(graph.incrementBaseToken()); // 路由根节点向前移动一步，走到k
     assertEquals("k", termAtt.toString());
-    assertFalse(graph.incrementGraphToken());
+    assertFalse(graph.incrementGraphToken()); // k后没有字符了
     assertEquals(0, graph.getTrailingPositions());
-    assertFalse(graph.incrementGraph());
-    assertFalse(graph.incrementBaseToken());
+    assertFalse(graph.incrementGraph()); // k-k，没有下一个路由了
+    assertFalse(graph.incrementBaseToken()); // k后没有字符了，返回false
     assertEquals(8, graph.cachedTokenCount());
   }
 
@@ -171,14 +184,16 @@ public class TestGraphTokenFilter extends BaseTokenStreamTestCase {
             1, 5, new Token("a", 0, 1), new Token("b", 0, 0, 1, 2), new Token("c", 1, 2, 3));
 
     GraphTokenFilter gts = new TestFilter(cts);
-    assertFalse(gts.incrementGraph());
-    assertTrue(gts.incrementBaseToken());
-    assertTrue(gts.incrementGraphToken());
-    assertFalse(gts.incrementGraphToken());
+    assertFalse(gts.incrementGraph()); // 未设置根节点，无路由
+    assertTrue(gts.incrementBaseToken()); // 根节点设置为a
+    assertTrue(gts.incrementGraphToken()); // 走到 c
+    assertFalse(gts.incrementGraphToken()); // c后无节点，无路可走
     assertEquals(1, gts.getTrailingPositions());
-    assertFalse(gts.incrementGraph());
-    assertTrue(gts.incrementBaseToken());
-    assertFalse(gts.incrementGraphToken());
+
+
+    assertFalse(gts.incrementGraph()); // 从a开始没有其他路由
+    assertTrue(gts.incrementBaseToken()); // 根节点设置为b
+    assertFalse(gts.incrementGraphToken()); // b后无节点，因为b占用宽度为2，c不在其路径上
     assertEquals(1, gts.getTrailingPositions());
     assertFalse(gts.incrementGraph());
   }

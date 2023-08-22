@@ -19,11 +19,16 @@ package org.apache.lucene.analysis.tokenattributes;
 import org.apache.lucene.util.Attribute;
 
 /**
+ *
  * Determines how many positions this token spans. Very few analyzer components actually produce
  * this attribute, and indexing ignores it, but it's useful to express the graph structure naturally
  * produced by decompounding, word splitting/joining, synonym filtering, etc.
  *
  * <p>NOTE: this is optional, and most analyzers don't change the default value (1).
+ *  确定此令牌跨越多少个位置。很少有分析器组件实际上产生这个属性，并且索引会忽略它，
+ *  但它对于表达由分解、分词/连接、同义词过滤等自然产生的图结构很有用。
+ *  注意：这是可选的，大多数分析器不会更改默认值 (1)。
+ *
  */
 public interface PositionLengthAttribute extends Attribute {
   /**

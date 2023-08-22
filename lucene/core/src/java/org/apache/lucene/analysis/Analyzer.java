@@ -35,6 +35,8 @@ import org.apache.lucene.util.CloseableThreadLocal;
  * An Analyzer builds TokenStreams, which analyze text. It thus represents a policy for extracting
  * index terms from text.
  *
+ * 分析器构建 TokenStreams，用于分析文本。因此，它代表了从文本中提取索引术语的策略。
+ *
  * <p>In order to define what analysis is done, subclasses must define their {@link
  * TokenStreamComponents TokenStreamComponents} in {@link #createComponents(String)}. The components
  * are then reused in each call to {@link #tokenStream(String, Reader)}.

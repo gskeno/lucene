@@ -21,7 +21,9 @@ import java.util.List;
 import java.util.Objects;
 import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
 
-/** Removes stop words from a token stream. */
+/** Removes stop words from a token stream.
+ * 移除停用词
+ */
 public class StopFilter extends FilteringTokenFilter {
 
   private final CharArraySet stopWords;
@@ -91,7 +93,9 @@ public class StopFilter extends FilteringTokenFilter {
     return stopSet;
   }
 
-  /** Returns the next input Token whose term() is not a stop word. */
+  /** Returns the next input Token whose term() is not a stop word.
+   * 停用词不会被接受
+   */
   @Override
   protected boolean accept() {
     return !stopWords.contains(termAtt.buffer(), 0, termAtt.length());

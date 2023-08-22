@@ -28,6 +28,18 @@ import org.apache.lucene.analysis.tokenattributes.PositionLengthAttribute;
 import org.apache.lucene.util.AttributeSource;
 
 /**
+ * 一个抽象的 TokenFilter，将其输入流公开为图形
+ * 调用incrementBaseToken()将图的根移动到TokenStream中的下一个位置，
+ * 调用incrementGraphToken()沿着当前图移动，调用incrementGraph()重置到基于当前根的下一个图。
+ * 例如，给定流“a b/c:2 d e”，然后使用位于“a”的基本标记，incrementGraphToken()将生成流“abd e”，
+ *
+ * b和c所处的位置相同，b拥有位置空间增量，c不拥有，b的空间长度为1，c的空间长度为2
+ *
+ * a--->b--->d--->e
+ * a--->c-------->e, 因为c空间长度为2，会跨过d
+ *
+ * 然后在调用incrementGraph()后将生成流“ac” e'。
+ *
  * An abstract TokenFilter that exposes its input stream as a graph
  *
  * <p>Call {@link #incrementBaseToken()} to move the root of the graph to the next position in the
@@ -70,7 +82,7 @@ public abstract class GraphTokenFilter extends TokenFilter {
 
   /**
    * Move the root of the graph to the next token in the wrapped TokenStream
-   *
+   * 移动到路由的根节点处
    * @return {@code false} if the underlying stream is exhausted
    */
   protected final boolean incrementBaseToken() throws IOException {
@@ -91,7 +103,7 @@ public abstract class GraphTokenFilter extends TokenFilter {
 
   /**
    * Move to the next token in the current route through the graph
-   *
+   * 在当前路由上移动到下一个token位置处
    * @return {@code false} if there are not more tokens in the current graph
    */
   protected final boolean incrementGraphToken() throws IOException {
@@ -112,9 +124,10 @@ public abstract class GraphTokenFilter extends TokenFilter {
   }
 
   /**
+   * 重置根token，走下一条路由
    * Reset to the root token again, and move down the next route through the graph
    *
-   * @return false if there are no more routes through the graph
+   * @return false if there are no more routes through the graph 无下一条路由可走时，返回false
    */
   protected final boolean incrementGraph() throws IOException {
     if (baseToken == null) {

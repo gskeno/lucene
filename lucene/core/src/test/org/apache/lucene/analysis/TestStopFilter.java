@@ -45,7 +45,7 @@ public class TestStopFilter extends BaseTokenStreamTestCase {
     final MockTokenizer in = new MockTokenizer(MockTokenizer.WHITESPACE, false);
     in.setReader(reader);
     TokenStream stream = new StopFilter(in, stopWords);
-    assertTokenStreamContents(stream, new String[] {"Now", "The"});
+    assertTokenStreamContents(stream, new String[] {"Now", "The"}); // is 和 Time是停用词，原句子中这两个词会被剔除
   }
 
   public void testStopFilter() throws IOException {
@@ -55,7 +55,7 @@ public class TestStopFilter extends BaseTokenStreamTestCase {
     final MockTokenizer in = new MockTokenizer(MockTokenizer.WHITESPACE, false);
     in.setReader(reader);
     TokenStream stream = new StopFilter(in, stopSet);
-    assertTokenStreamContents(stream, new String[] {"Now", "The"});
+    assertTokenStreamContents(stream, new String[] {"Now", "The"}); // is 和 Time是停用词，原句子中这两个词会被剔除
   }
 
   private static void logStopwords(String name, Collection<String> stopwords) {
@@ -177,13 +177,13 @@ public class TestStopFilter extends BaseTokenStreamTestCase {
     assertTokenStreamContents(
         stopfilter,
         new String[] {"test"},
-        new int[] {0},
-        new int[] {4},
+        new int[] {0}, // 包含该位置
+        new int[] {4}, // 不包含该位置
         null,
-        new int[] {1},
+        new int[] {1}, // posIncrements = 1，t比前一个字符s相比位置增量为1
         null,
-        7,
-        1,
+        7, // 原始字符串，最后一个下标是7(不包含)
+        1, // f相比上一个字符o，位置增量为1
         null,
         true,
         null);

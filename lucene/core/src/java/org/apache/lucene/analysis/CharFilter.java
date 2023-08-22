@@ -20,6 +20,8 @@ import java.io.IOException;
 import java.io.Reader;
 
 /**
+ * 支持reader偏移量跟踪
+ * 
  * Subclasses of CharFilter can be chained to filter a Reader They can be used as {@link
  * java.io.Reader} with additional offset correction. {@link Tokenizer}s will automatically use
  * {@link #correctOffset} if a CharFilter subclass is used.
@@ -50,10 +52,10 @@ public abstract class CharFilter extends Reader {
   }
 
   /**
-   * Closes the underlying input stream.
+   * Closes the underlying input stream. 关闭底层输入流
    *
    * <p><b>NOTE:</b> The default implementation closes the input Reader, so be sure to call <code>
-   * super.close()</code> when overriding this method.
+   * super.close()</code> when overriding this method. 默认实现会关闭input reader，子类重写该方法时需调用super.close()
    */
   @Override
   public void close() throws IOException {
