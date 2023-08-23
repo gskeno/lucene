@@ -32,13 +32,13 @@ import org.apache.lucene.util.automaton.Automaton;
  * bytes (or Unicode code points if unicodeArcs is true) from the {@link TermToBytesRefAttribute}.
  * Between tokens we insert POS_SEP and for holes we insert HOLE.
  *
- * @lucene.experimental
+ * @lucene.experimental 自动机
  */
 public class TokenStreamToAutomaton {
 
   private boolean preservePositionIncrements;
   private boolean finalOffsetGapAsHole;
-  private boolean unicodeArcs;
+  private boolean unicodeArcs; // arc 弧
 
   /** Sole constructor. */
   public TokenStreamToAutomaton() {
@@ -87,14 +87,14 @@ public class TokenStreamToAutomaton {
   }
 
   /**
-   * Subclass and implement this if you need to change the token (such as escaping certain bytes)
+   * Subclass and implement this if you need to change the token (such as escaping certain bytes) 例如转义某些字节
    * before it's turned into a graph.
    */
   protected BytesRef changeToken(BytesRef in) {
     return in;
   }
 
-  /** We create transition between two adjacent tokens. */
+  /** We create transition between two adjacent 相邻的 tokens. */
   public static final int POS_SEP = 0x001f;
 
   /** We add this arc to represent a hole. */
@@ -104,6 +104,8 @@ public class TokenStreamToAutomaton {
    * Pulls the graph (including {@link PositionLengthAttribute}) from the provided {@link
    * TokenStream}, and creates the corresponding automaton where arcs are bytes (or Unicode code
    * points if unicodeArcs = true) from each term.
+   *
+   * arcs 是每个术语的字节（如果 unicodeArcs = true，则为 Unicode 代码点）。
    */
   public Automaton toAutomaton(TokenStream in) throws IOException {
     final Automaton.Builder builder = new Automaton.Builder();

@@ -1285,7 +1285,7 @@ public abstract class BaseTokenStreamTestCase extends LuceneTestCase {
     List<Integer> endOffsets = new ArrayList<>();
     ts.reset();
 
-    // First pass: save away "correct" tokens
+    // First pass: save away "correct" tokens 第一遍：保存“正确”的令牌
     while (ts.incrementToken()) {
       assertNotNull("has no CharTermAttribute", termAtt);
       tokens.add(termAtt.toString());

@@ -27,6 +27,7 @@ import org.apache.lucene.tests.util.TestUtil;
 /**
  * Randomly inserts overlapped (posInc=0) tokens with posLength sometimes &gt; 1. The chain must
  * have an OffsetAttribute.
+ * 随机插入重叠 (posInc=0) 的标记，有时 posLength > 1。该链必须具有 OffsetAttribute。
  */
 public final class MockGraphTokenFilter
     extends LookaheadTokenFilter<LookaheadTokenFilter.Position> {
@@ -48,6 +49,10 @@ public final class MockGraphTokenFilter
     return new Position();
   }
 
+  /**
+   * 在遍历到某些token后，可以动态插入自定义token
+   * @throws IOException
+   */
   @Override
   protected void afterPosition() throws IOException {
     if (DEBUG) {
@@ -79,6 +84,7 @@ public final class MockGraphTokenFilter
         termAtt.append(TestUtil.randomUnicodeString(random));
         posIncAtt.setPositionIncrement(0);
         offsetAtt.setOffset(positions.get(outputPos).startOffset, posEndData.endOffset);
+        // System.out.println("afterPosition:" + termAtt);
         if (DEBUG) {
           System.out.println(
               "  inject: outputPos="
