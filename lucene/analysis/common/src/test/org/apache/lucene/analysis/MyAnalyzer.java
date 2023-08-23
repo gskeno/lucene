@@ -2,6 +2,9 @@ package org.apache.lucene.analysis;
 
 import org.apache.lucene.analysis.core.WhitespaceTokenizer;
 import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
+import org.apache.lucene.analysis.tokenattributes.OffsetAttribute;
+import org.apache.lucene.analysis.tokenattributes.PositionIncrementAttribute;
+import org.apache.lucene.analysis.tokenattributes.PositionLengthAttribute;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -11,7 +14,8 @@ public class MyAnalyzer extends Analyzer {
 
     @Override
     protected TokenStreamComponents createComponents(String fieldName) {
-        return new TokenStreamComponents(new WhitespaceTokenizer());
+        WhitespaceTokenizer whitespaceTokenizer = new WhitespaceTokenizer(); // 1
+        return new TokenStreamComponents(whitespaceTokenizer); // 内部会调用 whitespaceTokenizer.setReader方法
     }
 
     public static void main(String[] args) throws IOException {
@@ -19,19 +23,37 @@ public class MyAnalyzer extends Analyzer {
         final String text = " This is a demo of the TokenStream 😊 API";
 
         MyAnalyzer analyzer = new MyAnalyzer();
-        // tokenStream会回调上面的createComponents
-        // 这里返回的stream就是上面的WhitespaceTokenizer
+        // tokenStream会回调上面的createComponents方法
+        // 这里返回的stream就是上面标记1处的WhitespaceTokenizer
         TokenStream stream = analyzer.tokenStream("field", new StringReader(text));
 
         // get the CharTermAttribute from the TokenStream
         CharTermAttribute termAtt = stream.addAttribute(CharTermAttribute.class);
+        // get the OffsetAttribute from the TokenStream
+        OffsetAttribute offsetAttribute = stream.addAttribute(OffsetAttribute.class);
+        // get the PositionLengthAttribute from the TokenStream
+        PositionLengthAttribute positionLengthAttribute = stream.addAttribute(PositionLengthAttribute.class);
+        // get the PositionIncrementAttribute from the TokenStream
+        PositionIncrementAttribute positionIncrementAttribute = stream.addAttribute(PositionIncrementAttribute.class);
 
         try {
             stream.reset();
 
             // print all tokens until stream is exhausted
             while (stream.incrementToken()) {
+                // This
+                //is
+                //a
+                //demo
+                //of
+                //the
+                //TokenStream
+                //😊
+                //API
                 System.out.println(termAtt.toString());
+                System.out.println(offsetAttribute.startOffset() + ":" + offsetAttribute.endOffset());
+                System.out.println("positionLength:" + positionLengthAttribute.getPositionLength());
+                System.out.println("positionIncrementAttribute:" + positionIncrementAttribute.getPositionIncrement());
             }
 
             stream.end();

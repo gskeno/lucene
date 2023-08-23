@@ -1,13 +1,8 @@
 package org.apache.lucene.analysis.miscellaneous;
 
-import org.apache.lucene.analysis.Analyzer;
-import org.apache.lucene.analysis.TokenStream;
+import org.apache.lucene.analysis.*;
 import org.apache.lucene.analysis.core.WhitespaceTokenizer;
 import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
-import org.apache.lucene.util.Attribute;
-import org.apache.lucene.util.AttributeImpl;
-import org.apache.lucene.util.AttributeReflector;
-
 import java.io.IOException;
 import java.io.StringReader;
 
@@ -35,7 +30,12 @@ public class MyLengthAnalyzer extends Analyzer {
         try {
             stream.reset();
 
-            // print all tokens until stream is exhausted
+            // print all tokens until stream is exhausted 过滤掉长度小于3的token
+            // This
+            // demo
+            // the
+            // TokenStream
+            // API
             while (stream.incrementToken()) {
                 System.out.println(termAtt.toString());
             }
@@ -47,44 +47,3 @@ public class MyLengthAnalyzer extends Analyzer {
     }
 }
 
-/**
- * https://lucene.apache.org/core/9_7_0/core/org/apache/lucene/analysis/package-summary.html
- */
-interface PartOfSpeechAttribute extends Attribute {
-    public enum PartOfSpeech {
-        Noun, Verb, Adjective, Adverb, Pronoun, Preposition, Conjunction, Article, Unknown
-    }
-
-    public void setPartOfSpeech(PartOfSpeech pos);
-
-    public PartOfSpeech getPartOfSpeech();
-}
-
-final class PartOfSpeechAttributeImpl extends AttributeImpl
-        implements PartOfSpeechAttribute {
-
-    private PartOfSpeech pos = PartOfSpeech.Unknown;
-
-    public void setPartOfSpeech(PartOfSpeech pos) {
-        this.pos = pos;
-    }
-
-    public PartOfSpeech getPartOfSpeech() {
-        return pos;
-    }
-
-    @Override
-    public void clear() {
-        pos = PartOfSpeech.Unknown;
-    }
-
-    @Override
-    public void reflectWith(AttributeReflector reflector) {
-
-    }
-
-    @Override
-    public void copyTo(AttributeImpl target) {
-        ((PartOfSpeechAttribute) target).setPartOfSpeech(pos);
-    }
-}

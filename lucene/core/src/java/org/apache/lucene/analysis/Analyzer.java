@@ -339,7 +339,7 @@ public abstract class Analyzer implements Closeable {
   }
 
   /**
-   * This class encapsulates the outer components of a token stream. It provides access to the
+   * This class encapsulates(封装) the outer components of a token stream. It provides access to the
    * source (a {@link Reader} {@link Consumer} and the outer end (sink), an instance of {@link
    * TokenFilter} which also serves as the {@link TokenStream} returned by {@link
    * Analyzer#tokenStream(String, Reader)}.
@@ -359,7 +359,7 @@ public abstract class Analyzer implements Closeable {
     /**
      * Creates a new {@link TokenStreamComponents} instance.
      *
-     * @param source the source to set the reader on
+     * @param source the source to set the reader on 源，需要使用者输入Reader对象
      * @param result the analyzer's resulting token stream
      */
     public TokenStreamComponents(final Consumer<Reader> source, final TokenStream result) {
@@ -374,7 +374,7 @@ public abstract class Analyzer implements Closeable {
      * @param result the analyzer's resulting token stream
      */
     public TokenStreamComponents(final Tokenizer tokenizer, final TokenStream result) {
-      this(tokenizer::setReader, result);
+      this(input -> tokenizer.setReader(input), result);
     }
 
     /** Creates a new {@link TokenStreamComponents} from a Tokenizer */
