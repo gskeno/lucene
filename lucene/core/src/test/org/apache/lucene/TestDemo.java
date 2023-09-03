@@ -16,9 +16,15 @@
  */
 package org.apache.lucene;
 
+import java.io.File;
 import java.io.IOException;
+import java.net.URISyntaxException;
+import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.stream.Stream;
+
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.document.Document;
@@ -46,14 +52,25 @@ import org.apache.lucene.util.IOUtils;
  */
 public class TestDemo extends LuceneTestCase {
 
-  public void testDemo() throws IOException {
+  public void testPath(){
+    URL resource = this.getClass().getResource("/");
+    String indexDir = resource.getPath() + "testIndex";
+    // /Users/ruchen/IdeaProjects/lucene/lucene/core/build/idea/classes/test/testIndex
+    System.out.println(indexDir);
+    Path indexPath = Path.of(indexDir);
+    System.out.println(indexPath.toString());
+  }
+
+  // 引入了test-framework, 也就引入了一些codec实现类，会导致LukeMain无法识别
+  public void testDemo() throws IOException, URISyntaxException {
     String longTerm =
         "longtermlongtermlongtermlongtermlongtermlongtermlongtermlong"
             + "termlongtermlongtermlongtermlongtermlongtermlongtermlongterm"
             + "longtermlongtermlongterm";
     String text = "This is the text to be indexed. " + longTerm;
-
-    Path indexPath = Files.createTempDirectory("tempIndex");
+    URL resource = this.getClass().getResource("/");
+    // 在指定位置，创建临时目录，方便查看分析文件；且测试方法末尾不删除临时文件
+    Path indexPath = Files.createTempDirectory(Paths.get(resource.toURI()), "tempIndex");
     try (Directory dir = FSDirectory.open(indexPath)) {
       Analyzer analyzer = new StandardAnalyzer();
       try (IndexWriter iw = new IndexWriter(dir, new IndexWriterConfig(analyzer))) {
@@ -85,6 +102,6 @@ public class TestDemo extends LuceneTestCase {
       }
     }
 
-    IOUtils.rm(indexPath);
+    // IOUtils.rm(indexPath);
   }
 }

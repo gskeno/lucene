@@ -43,7 +43,7 @@ public class TestDemo extends LuceneTestCase {
   }
 
   public void testIndexSearch() throws Exception {
-    LEAVE_TEMPORARY.set(true);
+    //LEAVE_TEMPORARY.set(true);
     Path dir = getDataPath("test-files/docs");
     Path indexDir = createTempDir("ContribDemoTest");
     IndexFiles.main(
